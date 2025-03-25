@@ -2,7 +2,7 @@ import subprocess
 import sys
 import threading
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import filedialog, messagebox
 import qrcode
 import http.server
 import socketserver
@@ -11,8 +11,10 @@ from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 import stat
 
-# Función para instalar e importar paquetes
 def install_and_import(package, import_name=None):
+    """
+    Intenta importar el paquete; si falla, lo instala usando pip.
+    """
     try:
         if import_name:
             __import__(import_name)
@@ -27,9 +29,12 @@ install_and_import("watchdog")
 
 # Configuración del servidor
 PORT = 8000
-# Directorio donde se encuentran index.html, styles.css, scripts.js, imágenes, etc.
+# Valor por defecto de la carpeta de imágenes (se podrá cambiar desde la interfaz)
 DIRECTORY = r"C:\Users\ÁlvaroPavón\OneDrive - PLANTASUR TRADING SL\Escritorio\PruebaConexion"
 IP_LOCAL = "192.168.1.94"  # Reemplaza con tu dirección IP local
+
+# Ruta del script (para guardar el código QR en la misma carpeta del script)
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 def cambiar_permisos(directorio):
     try:
@@ -48,17 +53,19 @@ def generar_qr():
     url = f"http://{IP_LOCAL}:{PORT}"
     qr = qrcode.make(url)
     try:
-        qr.save(os.path.join(DIRECTORY, "codigo_qr.png"))
+        qr_path = os.path.join(SCRIPT_DIR, "codigo_qr.png")
+        qr.save(qr_path)
         print(f"Código QR generado: {url}")
+        print(f"Guardado en: {qr_path}")
     except Exception as e:
         print(f"Error al guardar el código QR: {e}")
 
 class FileChangeHandler(FileSystemEventHandler):
     def on_modified(self, event):
         print("Cambio detectado en el directorio.")
-        # Aquí se podría agregar lógica para actualizar la galería
+        # Aquí podrías agregar lógica para actualizar la galería si es necesario.
 
-# Clase para correr el servidor en un hilo separado
+# Hilo para correr el servidor y el observador
 class ServerThread(threading.Thread):
     def __init__(self):
         threading.Thread.__init__(self)
@@ -67,7 +74,7 @@ class ServerThread(threading.Thread):
 
     def run(self):
         cambiar_permisos(DIRECTORY)
-        # Iniciar el observador para detectar cambios
+        # Iniciar observador para detectar cambios en la carpeta seleccionada
         self.observer = Observer()
         self.observer.schedule(FileChangeHandler(), DIRECTORY, recursive=True)
         self.observer.start()
@@ -87,14 +94,12 @@ class ServerThread(threading.Thread):
             self.observer.stop()
             self.observer.join()
 
-# Variables globales para el hilo del servidor
-server_thread = None
+server_thread = None  # Variable global para el hilo del servidor
 
-# Funciones para iniciar y detener el servidor mediante la interfaz
 def start_server():
     global server_thread
     if server_thread is None or not server_thread.is_alive():
-        generar_qr()  # Genera el código QR antes de iniciar el servidor
+        generar_qr()  # Genera el código QR en la carpeta del script
         server_thread = ServerThread()
         server_thread.start()
         status_label.config(text="Servidor iniciado.")
@@ -109,18 +114,33 @@ def stop_server():
     else:
         messagebox.showinfo("Información", "El servidor no está en ejecución.")
 
-# Crear la interfaz gráfica con Tkinter
+def select_directory():
+    """Abre un diálogo para seleccionar la carpeta de fotos y actualiza la variable DIRECTORY."""
+    global DIRECTORY
+    new_dir = filedialog.askdirectory(initialdir=DIRECTORY, title="Selecciona la carpeta de fotos")
+    if new_dir:
+        DIRECTORY = new_dir
+        path_label.config(text=f"Carpeta: {DIRECTORY}")
+        print(f"Nueva carpeta seleccionada: {DIRECTORY}")
+
+# Interfaz gráfica con Tkinter
 root = tk.Tk()
 root.title("Control de Servidor de Galería")
-root.geometry("300x150")
+root.geometry("350x200")
 
-start_button = tk.Button(root, text="Iniciar Servidor", command=start_server, width=20)
-start_button.pack(pady=10)
+start_button = tk.Button(root, text="Iniciar Servidor", command=start_server, width=25)
+start_button.pack(pady=5)
 
-stop_button = tk.Button(root, text="Detener Servidor", command=stop_server, width=20)
-stop_button.pack(pady=10)
+stop_button = tk.Button(root, text="Detener Servidor", command=stop_server, width=25)
+stop_button.pack(pady=5)
+
+dir_button = tk.Button(root, text="Seleccionar Carpeta de Fotos", command=select_directory, width=25)
+dir_button.pack(pady=5)
+
+path_label = tk.Label(root, text=f"Carpeta: {DIRECTORY}", wraplength=300)
+path_label.pack(pady=5)
 
 status_label = tk.Label(root, text="Servidor detenido.")
-status_label.pack(pady=10)
+status_label.pack(pady=5)
 
 root.mainloop()
