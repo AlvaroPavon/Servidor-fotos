@@ -17,6 +17,8 @@ class Handler(http.server.SimpleHTTPRequestHandler):
 def generar_galeria():
     extensiones_imagenes = ('.png', '.jpg', '.jpeg', '.gif', '.bmp', '.tiff', '.webp','jfif')
     imagenes = [f for f in os.listdir(DIRECTORY) if f.lower().endswith(extensiones_imagenes)]
+    
+    # Iniciar el contenido HTML
     html_content = '''
     <html>
     <head>
@@ -24,50 +26,33 @@ def generar_galeria():
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/samsunginternet/OneUI-Web/oui-css/oui.css">
         <style>
             :root {
-                --primary-color: #4CAF50;
+                --primary-color: #0078D4;  /* Azul One UI */
                 --secondary-color: #ffffff;
                 --bg-color-light: #ffffff;
                 --text-color-light: #000000;
                 --bg-color-dark: #121212;
                 --text-color-dark: #ffffff;
             }
-            body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: var(--bg-color); color: var(--text-color); }
-            .gallery { display: flex; flex-wrap: wrap; justify-content: center; }
+            body { font-family: 'SamsungOne', Arial, sans-serif; margin: 0; padding: 0; background-color: var(--bg-color); color: var(--text-color); }
+            .gallery { display: flex; flex-wrap: wrap; justify-content: center; padding: 20px; }
             .gallery img { width: 100%; max-width: 200px; height: auto; object-fit: cover; margin: 10px; cursor: pointer; border-radius: 10px; transition: transform 0.3s ease; }
             .gallery img:hover { transform: scale(1.05); }
             .modal { display: none; position: fixed; z-index: 1; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.8); animation: fadeIn 0.5s; }
             .modal-content { margin: auto; display: block; width: 80%; max-width: 700px; height: auto; border-radius: 10px; animation: zoomIn 0.5s; }
-            .close { position: absolute; top: 20px; right: 35px; color: var(--text-color); font-size: 30px; font-weight: bold; cursor: pointer; }
-            .download-btn { display: block; margin: 20px auto; padding: 8px 16px; background-color: var(--primary-color); color: var(--secondary-color); text-align: center; text-decoration: none; font-size: 16px; border-radius: 5px; width: auto; }
-            .modal-body { text-align: center; }
-            .select-btn { display: block; margin: 20px auto; padding: 8px 16px; background-color: var(--primary-color); color: var(--secondary-color); text-align: center; text-decoration: none; font-size: 16px; border-radius: 5px; width: auto; cursor: pointer; }
-            .multi-select-btn { position: fixed; top: 10px; left: 10px; padding: 8px 16px; background-color: var(--primary-color); color: var(--secondary-color); text-align: center; text-decoration: none; font-size: 16px; border-radius: 5px; cursor: pointer; z-index: 2; }
+            .close { position: absolute; top: 20px; right: 35px; color: var(--text-color); font-size: 25px; font-weight: bold; cursor: pointer; }
+            .download-btn { display: block; margin: 20px auto; padding: 6px 12px; background-color: var(--primary-color); color: var(--secondary-color); text-align: center; text-decoration: none; font-size: 14px; border-radius: 5px; }
+            .multi-select-btn { position: fixed; top: 10px; left: 10px; padding: 6px 12px; background-color: var(--primary-color); color: var(--secondary-color); text-align: center; text-decoration: none; font-size: 14px; border-radius: 5px; cursor: pointer; z-index: 2; }
             .selected { border: 5px solid var(--primary-color); }
-            .counter { position: fixed; top: 10px; right: 10px; padding: 8px 16px; background-color: var(--primary-color); color: var(--secondary-color); text-align: center; font-size: 16px; border-radius: 5px; z-index: 2; display: flex; align-items: center; }
+            .counter { position: fixed; top: 10px; right: 10px; padding: 6px 12px; background-color: var(--primary-color); color: var(--secondary-color); text-align: center; font-size: 14px; border-radius: 5px; z-index: 2; display: flex; align-items: center; }
             .counter .select-btn { margin-left: 10px; }
-            @media (max-width: 600px) {
-                .gallery img { max-width: 100px; }
-                .modal-content { width: 100%; }
-                .download-btn, .select-btn, .multi-select-btn, .counter { font-size: 14px; padding: 6px 12px; }
-                .close { font-size: 25px; }
-            }
-            @media (max-width: 400px) {
-                .gallery img { max-width: 80px; }
-                .modal-content { width: 100%; }
-                .download-btn, .select-btn, .multi-select-btn, .counter { font-size: 12px; padding: 4px 8px; }
-                .close { font-size: 20px; }
-            }
-            @keyframes fadeIn {
-                from { opacity: 0; }
-                to { opacity: 1; }
-            }
-            @keyframes zoomIn {
-                from { transform: scale(0.5); }
-                to { transform: scale(1); }
-            }
+            @media (max-width: 600px) { .gallery img { max-width: 120px; } .modal-content { width: 100%; } .download-btn, .select-btn, .multi-select-btn, .counter { font-size: 12px; padding: 4px 8px; } .close { font-size: 20px; } }
+            @media (max-width: 400px) { .gallery img { max-width: 80px; } .modal-content { width: 100%; } .download-btn, .select-btn, .multi-select-btn, .counter { font-size: 12px; padding: 4px 8px; } .close { font-size: 18px; } }
+            @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+            @keyframes zoomIn { from { transform: scale(0.5); } to { transform: scale(1); } }
         </style>
         <script>
             let multiSelectActive = false;
+
             function setTheme() {
                 const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
                 if (prefersDark) {
@@ -81,6 +66,7 @@ def generar_galeria():
             }
             window.addEventListener('load', setTheme);
             window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', setTheme);
+
             function openModal(src) {
                 if (!multiSelectActive) {
                     document.getElementById('myModal').style.display = "block";
@@ -89,13 +75,16 @@ def generar_galeria():
                     document.getElementById('downloadLink').href = src;
                 }
             }
+
             function closeModal() {
                 document.getElementById('myModal').style.display = "none";
             }
+
             function toggleSelect(img) {
                 img.classList.toggle('selected');
                 updateCounter();
             }
+
             function downloadSelected() {
                 const selectedImages = document.querySelectorAll('.gallery img.selected');
                 selectedImages.forEach(img => {
@@ -105,6 +94,7 @@ def generar_galeria():
                     link.click();
                 });
             }
+
             function toggleMultiSelect() {
                 multiSelectActive = !multiSelectActive;
                 document.querySelector('.multi-select-btn').textContent = multiSelectActive ? 'Desactivar Selección Múltiple' : 'Activar Selección Múltiple';
@@ -117,6 +107,7 @@ def generar_galeria():
                 }
                 updateCounter();
             }
+
             function updateCounter() {
                 const count = document.querySelectorAll('.gallery img.selected').length;
                 document.querySelector('.counter').textContent = `Seleccionadas: ${count}`;
@@ -133,6 +124,7 @@ def generar_galeria():
                     selectBtn.remove();
                 }
             }
+
             document.addEventListener('contextmenu', event => event.preventDefault());
         </script>
         <meta name="theme-color" content="#ffffff">
@@ -143,8 +135,11 @@ def generar_galeria():
         <div class="counter" style="display:none;">Seleccionadas: 0</div>
         <div class="gallery">
     '''
+    
+    # Generar imágenes de la carpeta
     for imagen in imagenes:
         html_content += f'<img src="{imagen}" alt="{imagen}" onclick="openModal(\'{imagen}\')" ondblclick="toggleSelect(this)">'
+    
     html_content += '''
         </div>
         <div id="myModal" class="modal">
