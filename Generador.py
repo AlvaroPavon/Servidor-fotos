@@ -7,12 +7,12 @@ from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 import stat
 
-# Configuración del servidor
+# Configuracion del servidor
 PORT = 8000
 DIRECTORY = r"C:\Users\ÁlvaroPavón\OneDrive - PLANTASUR TRADING SL\Escritorio\PruebaConexion"
-IP_LOCAL = "192.168.1.94"  # Reemplaza esto con tu dirección IP local
+IP_LOCAL = "192.168.1.94"  # Reemplaza esto con tu direccion IP local
 
-# Función para cambiar los permisos del directorio
+# Funcion para cambiar los permisos del directorio
 def cambiar_permisos(directorio):
     try:
         # Cambiar los permisos para que todos los usuarios tengan acceso de lectura y escritura
@@ -28,7 +28,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self.path = '/index.html'
         return http.server.SimpleHTTPRequestHandler.do_GET(self)
 
-# Función para generar la galería
+# Funcion para generar la galeria
 def generar_galeria():
     extensiones_imagenes = ('.png', '.jpg', '.jpeg', '.gif', '.bmp', '.tiff', '.webp', 'jfif')
     imagenes = [f for f in os.listdir(DIRECTORY) if f.lower().endswith(extensiones_imagenes)]
@@ -37,33 +37,37 @@ def generar_galeria():
     html_content = '''
     <html>
     <head>
-        <title>Galería de Fotos</title>
+        <title>Galeria de Fotos</title>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/samsunginternet/OneUI-Web/oui-css/oui.css">
         <style>
             :root {
                 --primary-color: #0078D4;  /* Azul One UI */
                 --secondary-color: #ffffff;
-                --bg-color-light: #ffffff;
-                --text-color-light: #000000;
+                --bg-color-light: #f8f9fa;
                 --bg-color-dark: #121212;
+                --text-color-light: #000000;
                 --text-color-dark: #ffffff;
+                --border-radius: 8px;
+                --card-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             }
             body {
                 font-family: 'SamsungOne', Arial, sans-serif;
                 margin: 0;
                 padding: 0;
-                background-color: var(--bg-color);
-                color: var(--text-color);
+                background-color: var(--bg-color-light);
+                color: var(--text-color-light);
                 display: flex;
                 flex-direction: column;
                 justify-content: center;
                 align-items: center;
                 min-height: 100vh;
+                box-sizing: border-box;
             }
             h1 {
                 font-size: 24px;
                 text-align: center;
                 margin-bottom: 20px;
+                color: var(--primary-color);
             }
             .gallery {
                 display: flex;
@@ -78,10 +82,11 @@ def generar_galeria():
                 max-width: 180px;
                 height: auto;
                 object-fit: cover;
-                border-radius: 10px;
+                border-radius: var(--border-radius);
                 transition: transform 0.3s ease;
                 cursor: pointer;
                 position: relative;
+                box-shadow: var(--card-shadow);
                 border: 3px solid transparent;
             }
             .gallery img.selected {
@@ -132,7 +137,7 @@ def generar_galeria():
                 position: absolute;
                 top: 20px;
                 right: 35px;
-                color: var(--text-color);
+                color: var(--text-color-light);
                 font-size: 30px;
                 font-weight: bold;
                 cursor: pointer;
@@ -146,7 +151,7 @@ def generar_galeria():
                 text-align: center;
                 text-decoration: none;
                 font-size: 16px;
-                border-radius: 5px;
+                border-radius: var(--border-radius);
                 cursor: pointer;
             }
             .multi-select-btn, .counter {
@@ -157,7 +162,7 @@ def generar_galeria():
                 text-align: center;
                 text-decoration: none;
                 font-size: 16px;
-                border-radius: 5px;
+                border-radius: var(--border-radius);
                 cursor: pointer;
                 z-index: 2;
             }
@@ -210,11 +215,11 @@ def generar_galeria():
             function setTheme() {
                 const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
                 if (prefersDark) {
-                    document.documentElement.style.setProperty('--bg-color', '#121212');
-                    document.documentElement.style.setProperty('--text-color', '#ffffff');
+                    document.documentElement.style.setProperty('--bg-color-light', '#121212');
+                    document.documentElement.style.setProperty('--text-color-light', '#ffffff');
                 } else {
-                    document.documentElement.style.setProperty('--bg-color', '#ffffff');
-                    document.documentElement.style.setProperty('--text-color', '#000000');
+                    document.documentElement.style.setProperty('--bg-color-light', '#ffffff');
+                    document.documentElement.style.setProperty('--text-color-light', '#000000');
                 }
                 document.querySelector('meta[name="theme-color"]').setAttribute('content', prefersDark ? '#121212' : '#ffffff');
             }
@@ -251,7 +256,7 @@ def generar_galeria():
 
             function toggleMultiSelect() {
                 multiSelectActive = !multiSelectActive;
-                document.querySelector('.multi-select-btn').textContent = multiSelectActive ? 'Desactivar Selección Múltiple' : 'Activar Selección Múltiple';
+                document.querySelector('.multi-select-btn').textContent = multiSelectActive ? 'Desactivar Seleccion Multiple' : 'Activar Seleccion Multiple';
                 document.querySelectorAll('.gallery img').forEach(img => {
                     img.onclick = multiSelectActive ? () => toggleSelect(img) : () => openModal(img.src);
                 });
@@ -269,7 +274,7 @@ def generar_galeria():
                 if (multiSelectActive) {
                     if (!selectBtn) {
                         const btn = document.createElement('button');
-                        btn.className = 'select-btn';
+                        btn.className = 'select-btn download-btn';  // Usando el mismo estilo de botón
                         btn.textContent = 'Descargar Seleccionadas';
                         btn.onclick = downloadSelected;
                         document.querySelector('.counter').appendChild(btn);
@@ -284,13 +289,13 @@ def generar_galeria():
         <meta name="theme-color" content="#ffffff">
     </head>
     <body>
-        <h1>Galería de Fotos</h1>
-        <button class="multi-select-btn" onclick="toggleMultiSelect()">Activar Selección Múltiple</button>
+        <h1>Galeria de Fotos</h1>
+        <button class="multi-select-btn" onclick="toggleMultiSelect()">Activar Seleccion Multiple</button>
         <div class="counter" style="display:none;">Seleccionadas: 0</div>
         <div class="gallery" id="gallery">
     '''
     
-    # Generar imágenes de la carpeta
+    # Generar imagenes de la carpeta
     for imagen in imagenes:
         html_content += f'''
         <div class="image-container">
@@ -312,24 +317,24 @@ def generar_galeria():
     </html>
     '''
     
-    # Guardar el archivo HTML con codificación UTF-8
+    # Guardar el archivo HTML con codificacion UTF-8
     with open(os.path.join(DIRECTORY, 'index.html'), 'w', encoding='utf-8') as f:
         f.write(html_content)
 
-# Función para generar el código QR
+# Funcion para generar el codigo QR
 def generar_qr():
     url = f"http://{IP_LOCAL}:{PORT}"
     qr = qrcode.make(url)
     qr.save("codigo_qr.png")
-    print(f"Código QR generado: {url}")
+    print(f"Codigo QR generado: {url}")
 
-# Función para observar cambios en la carpeta y generar la galería automáticamente
+# Funcion para observar cambios en la carpeta y generar la galeria automaticamente
 class FileChangeHandler(FileSystemEventHandler):
     def on_modified(self, event):
         if event.src_path.startswith(DIRECTORY):
             generar_galeria()
 
-# Función para iniciar el servidor
+# Funcion para iniciar el servidor
 def iniciar_servidor():
     # Cambiar los permisos del directorio antes de continuar
     cambiar_permisos(DIRECTORY)
