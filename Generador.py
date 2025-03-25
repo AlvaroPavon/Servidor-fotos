@@ -21,23 +21,53 @@ def generar_galeria():
     <html>
     <head>
         <title>Galería de Fotos</title>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/samsunginternet/OneUI-Web/oui-css/oui.css">
         <style>
+            :root {
+                --primary-color: #4CAF50;
+                --secondary-color: #ffffff;
+                --bg-color-light: #ffffff;
+                --text-color-light: #000000;
+                --bg-color-dark: #121212;
+                --text-color-dark: #ffffff;
+            }
             body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: var(--bg-color); color: var(--text-color); }
             .gallery { display: flex; flex-wrap: wrap; justify-content: center; }
-            .gallery img { width: 100%; max-width: 200px; height: auto; object-fit: cover; margin: 10px; cursor: pointer; border-radius: 10px; }
-            .modal { display: none; position: fixed; z-index: 1; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.8); }
-            .modal-content { margin: auto; display: block; width: 80%; max-width: 700px; height: auto; border-radius: 10px; }
-            .close { position: absolute; top: 20px; right: 35px; color: var(--text-color); font-size: 40px; font-weight: bold; cursor: pointer; }
-            .download-btn { display: block; margin: 20px auto; padding: 10px 20px; background-color: #4CAF50; color: white; text-align: center; text-decoration: none; font-size: 20px; border-radius: 5px; width: auto; }
+            .gallery img { width: 100%; max-width: 200px; height: auto; object-fit: cover; margin: 10px; cursor: pointer; border-radius: 10px; transition: transform 0.3s ease; }
+            .gallery img:hover { transform: scale(1.05); }
+            .modal { display: none; position: fixed; z-index: 1; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.8); animation: fadeIn 0.5s; }
+            .modal-content { margin: auto; display: block; width: 80%; max-width: 700px; height: auto; border-radius: 10px; animation: zoomIn 0.5s; }
+            .close { position: absolute; top: 20px; right: 35px; color: var(--text-color); font-size: 30px; font-weight: bold; cursor: pointer; }
+            .download-btn { display: block; margin: 20px auto; padding: 8px 16px; background-color: var(--primary-color); color: var(--secondary-color); text-align: center; text-decoration: none; font-size: 16px; border-radius: 5px; width: auto; }
             .modal-body { text-align: center; }
+            .select-btn { display: block; margin: 20px auto; padding: 8px 16px; background-color: var(--primary-color); color: var(--secondary-color); text-align: center; text-decoration: none; font-size: 16px; border-radius: 5px; width: auto; cursor: pointer; }
+            .multi-select-btn { position: fixed; top: 10px; left: 10px; padding: 8px 16px; background-color: var(--primary-color); color: var(--secondary-color); text-align: center; text-decoration: none; font-size: 16px; border-radius: 5px; cursor: pointer; z-index: 2; }
+            .selected { border: 5px solid var(--primary-color); }
+            .counter { position: fixed; top: 10px; right: 10px; padding: 8px 16px; background-color: var(--primary-color); color: var(--secondary-color); text-align: center; font-size: 16px; border-radius: 5px; z-index: 2; display: flex; align-items: center; }
+            .counter .select-btn { margin-left: 10px; }
             @media (max-width: 600px) {
                 .gallery img { max-width: 100px; }
                 .modal-content { width: 100%; }
-                .download-btn { font-size: 16px; padding: 8px 16px; }
-                .close { font-size: 30px; }
+                .download-btn, .select-btn, .multi-select-btn, .counter { font-size: 14px; padding: 6px 12px; }
+                .close { font-size: 25px; }
+            }
+            @media (max-width: 400px) {
+                .gallery img { max-width: 80px; }
+                .modal-content { width: 100%; }
+                .download-btn, .select-btn, .multi-select-btn, .counter { font-size: 12px; padding: 4px 8px; }
+                .close { font-size: 20px; }
+            }
+            @keyframes fadeIn {
+                from { opacity: 0; }
+                to { opacity: 1; }
+            }
+            @keyframes zoomIn {
+                from { transform: scale(0.5); }
+                to { transform: scale(1); }
             }
         </style>
         <script>
+            let multiSelectActive = false;
             function setTheme() {
                 const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
                 if (prefersDark) {
@@ -47,26 +77,81 @@ def generar_galeria():
                     document.documentElement.style.setProperty('--bg-color', '#ffffff');
                     document.documentElement.style.setProperty('--text-color', '#000000');
                 }
+                document.querySelector('meta[name="theme-color"]').setAttribute('content', prefersDark ? '#121212' : '#ffffff');
             }
             window.addEventListener('load', setTheme);
             window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', setTheme);
             function openModal(src) {
-                document.getElementById('myModal').style.display = "block";
-                document.getElementById('modalImage').src = src;
-                document.getElementById('modalImage').style.maxHeight = "80vh";
-                document.getElementById('downloadLink').href = src;
+                if (!multiSelectActive) {
+                    document.getElementById('myModal').style.display = "block";
+                    document.getElementById('modalImage').src = src;
+                    document.getElementById('modalImage').style.maxHeight = "80vh";
+                    document.getElementById('downloadLink').href = src;
+                }
             }
             function closeModal() {
                 document.getElementById('myModal').style.display = "none";
             }
+            function toggleSelect(img) {
+                img.classList.toggle('selected');
+                updateCounter();
+            }
+            function downloadSelected() {
+                const selectedImages = document.querySelectorAll('.gallery img.selected');
+                selectedImages.forEach(img => {
+                    const link = document.createElement('a');
+                    link.href = img.src;
+                    link.download = img.alt;
+                    link.click();
+                });
+            }
+            function toggleMultiSelect() {
+                multiSelectActive = !multiSelectActive;
+                document.querySelector('.multi-select-btn').textContent = multiSelectActive ? 'Desactivar Selección Múltiple' : 'Activar Selección Múltiple';
+                document.querySelectorAll('.gallery img').forEach(img => {
+                    img.onclick = multiSelectActive ? () => toggleSelect(img) : () => openModal(img.src);
+                });
+                document.querySelector('.counter').style.display = multiSelectActive ? 'flex' : 'none';
+                if (!multiSelectActive) {
+                    document.querySelectorAll('.gallery img.selected').forEach(img => img.classList.remove('selected'));
+                }
+                updateCounter();
+            }
+            function updateCounter() {
+                const count = document.querySelectorAll('.gallery img.selected').length;
+                document.querySelector('.counter').textContent = `Seleccionadas: ${count}`;
+                const selectBtn = document.querySelector('.counter .select-btn');
+                if (multiSelectActive) {
+                    if (!selectBtn) {
+                        const btn = document.createElement('button');
+                        btn.className = 'select-btn';
+                        btn.textContent = 'Descargar Seleccionadas';
+                        btn.onclick = downloadSelected;
+                        document.querySelector('.counter').appendChild(btn);
+                    }
+                } else if (selectBtn) {
+                    selectBtn.remove();
+                }
+            }
+            document.addEventListener('contextmenu', event => event.preventDefault());
         </script>
+        <meta name="theme-color" content="#ffffff">
     </head>
     <body>
         <h1 style="text-align:center;">Galería de Fotos</h1>
+        <button class="multi-select-btn" onclick="toggleMultiSelect()">Activar Selección Múltiple</button>
+        <div class="counter" style="display:none;">Seleccionadas: 0</div>
         <div class="gallery">
     '''
     for imagen in imagenes:
-        html_content += f'<img src="{imagen}" alt="{imagen}" onclick="openModal(\'{imagen}\')">'
+        html_content += f'<img src="{imagen}" alt="{imagen}" onclick="openModal(\'{imagen}\')" ondblclick="toggleSelect(this)">'
+    html_content += '''
+        </div>
+        <div id="myModal" class="modal">
+            <span class="close" onclick="closeModal()">&times;        <div class="gallery">
+    '''
+    for imagen in imagenes:
+        html_content += f'<img src="{imagen}" alt="{imagen}" onclick="openModal(\'{imagen}\')" ondblclick="toggleSelect(this)">'
     html_content += '''
         </div>
         <div id="myModal" class="modal">
@@ -96,6 +181,11 @@ def iniciar_servidor():
     with socketserver.TCPServer(("", PORT), Handler) as httpd:
         print(f"Servidor iniciado en {IP_LOCAL}:{PORT}")
         httpd.serve_forever()
+
+if __name__ == "__main__":
+    generar_galeria()
+    generar_qr()
+    iniciar_servidor()
 
 if __name__ == "__main__":
     generar_galeria()
