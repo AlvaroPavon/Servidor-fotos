@@ -148,13 +148,6 @@ def generar_galeria():
     html_content += '''
         </div>
         <div id="myModal" class="modal">
-            <span class="close" onclick="closeModal()">&times;        <div class="gallery">
-    '''
-    for imagen in imagenes:
-        html_content += f'<img src="{imagen}" alt="{imagen}" onclick="openModal(\'{imagen}\')" ondblclick="toggleSelect(this)">'
-    html_content += '''
-        </div>
-        <div id="myModal" class="modal">
             <span class="close" onclick="closeModal()">&times;</span>
             <div class="modal-body">
                 <img class="modal-content" id="modalImage">
@@ -181,11 +174,6 @@ def iniciar_servidor():
     with socketserver.TCPServer(("", PORT), Handler) as httpd:
         print(f"Servidor iniciado en {IP_LOCAL}:{PORT}")
         httpd.serve_forever()
-
-if __name__ == "__main__":
-    generar_galeria()
-    generar_qr()
-    iniciar_servidor()
 
 if __name__ == "__main__":
     generar_galeria()
