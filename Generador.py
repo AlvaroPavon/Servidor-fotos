@@ -2,18 +2,33 @@ import qrcode
 import http.server
 import socketserver
 import os
+import time
+from watchdog.observers import Observer
+from watchdog.events import FileSystemEventHandler
+import stat
 
 # Configuración del servidor
 PORT = 8000
 DIRECTORY = r"C:\Users\ÁlvaroPavón\OneDrive - PLANTASUR TRADING SL\Escritorio\PruebaConexion"
 IP_LOCAL = "192.168.1.94"  # Reemplaza esto con tu dirección IP local
 
+# Función para cambiar los permisos del directorio
+def cambiar_permisos(directorio):
+    try:
+        # Cambiar los permisos para que todos los usuarios tengan acceso de lectura y escritura
+        os.chmod(directorio, stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO)
+        print(f"Permisos de {directorio} cambiados exitosamente.")
+    except Exception as e:
+        print(f"Error al cambiar permisos: {e}")
+
+# Definir el manejador para las solicitudes HTTP
 class Handler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
         if self.path == '/':
             self.path = '/index.html'
         return http.server.SimpleHTTPRequestHandler.do_GET(self)
 
+# Función para generar la galería
 def generar_galeria():
     extensiones_imagenes = ('.png', '.jpg', '.jpeg', '.gif', '.bmp', '.tiff', '.webp','jfif')
     imagenes = [f for f in os.listdir(DIRECTORY) if f.lower().endswith(extensiones_imagenes)]
@@ -133,7 +148,7 @@ def generar_galeria():
         <h1 style="text-align:center;">Galería de Fotos</h1>
         <button class="multi-select-btn" onclick="toggleMultiSelect()">Activar Selección Múltiple</button>
         <div class="counter" style="display:none;">Seleccionadas: 0</div>
-        <div class="gallery">
+        <div class="gallery" id="gallery">
     '''
     
     # Generar imágenes de la carpeta
@@ -153,22 +168,42 @@ def generar_galeria():
     </html>
     '''
     
+    # Guardar el archivo HTML
     with open(os.path.join(DIRECTORY, 'index.html'), 'w') as f:
         f.write(html_content)
 
-# Generar el código QR
+# Función para generar el código QR
 def generar_qr():
     url = f"http://{IP_LOCAL}:{PORT}"
     qr = qrcode.make(url)
     qr.save("codigo_qr.png")
     print(f"Código QR generado: {url}")
 
-# Iniciar el servidor
+# Función para observar cambios en la carpeta y generar la galería automáticamente
+class FileChangeHandler(FileSystemEventHandler):
+    def on_modified(self, event):
+        if event.src_path.startswith(DIRECTORY):
+            generar_galeria()
+
+# Función para iniciar el servidor
 def iniciar_servidor():
-    os.chdir(DIRECTORY)
-    with socketserver.TCPServer(("", PORT), Handler) as httpd:
-        print(f"Servidor iniciado en {IP_LOCAL}:{PORT}")
-        httpd.serve_forever()
+    # Cambiar los permisos del directorio antes de continuar
+    cambiar_permisos(DIRECTORY)
+    
+    # Configurar observador de cambios
+    event_handler = FileChangeHandler()
+    observer = Observer()
+    observer.schedule(event_handler, DIRECTORY, recursive=False)
+    observer.start()
+
+    try:
+        os.chdir(DIRECTORY)
+        with socketserver.TCPServer(("", PORT), Handler) as httpd:
+            print(f"Servidor iniciado en {IP_LOCAL}:{PORT}")
+            httpd.serve_forever()
+    except KeyboardInterrupt:
+        observer.stop()
+    observer.join()
 
 if __name__ == "__main__":
     generar_galeria()
