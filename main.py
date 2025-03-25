@@ -11,10 +11,8 @@ from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 import stat
 
+# Función para instalar e importar paquetes si no están presentes
 def install_and_import(package, import_name=None):
-    """
-    Intenta importar el paquete; si falla, lo instala usando pip.
-    """
     try:
         if import_name:
             __import__(import_name)
@@ -27,13 +25,21 @@ def install_and_import(package, import_name=None):
 install_and_import("qrcode[pil]", "qrcode")
 install_and_import("watchdog")
 
+# Función para obtener la ruta de recursos, útil al empaquetar con PyInstaller
+def resource_path(relative_path):
+    try:
+        base_path = sys._MEIPASS  # Usado por PyInstaller
+    except Exception:
+        base_path = os.path.abspath(".")
+    return os.path.join(base_path, relative_path)
+
 # Configuración del servidor
 PORT = 8000
-# Valor por defecto de la carpeta de imágenes (se podrá cambiar desde la interfaz)
-DIRECTORY = r"C:\Users\ÁlvaroPavón\OneDrive - PLANTASUR TRADING SL\Escritorio\PruebaConexion"
-IP_LOCAL = "192.168.1.94"  # Reemplaza con tu dirección IP local
+# Carpeta por defecto para cargar las imágenes (se espera que exista una carpeta "photos" junto al ejecutable)
+DIRECTORY = resource_path("photos")
+IP_LOCAL = "192.168.1.94"  # Reemplaza con tu dirección IP local si es necesario
 
-# Ruta del script (para guardar el código QR en la misma carpeta del script)
+# Ruta del script (para guardar el código QR en la misma carpeta del ejecutable)
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 def cambiar_permisos(directorio):
@@ -63,9 +69,9 @@ def generar_qr():
 class FileChangeHandler(FileSystemEventHandler):
     def on_modified(self, event):
         print("Cambio detectado en el directorio.")
-        # Aquí podrías agregar lógica para actualizar la galería si es necesario.
+        # Aquí podrías agregar lógica para regenerar la galería si es necesario.
 
-# Hilo para correr el servidor y el observador
+# Clase para correr el servidor y el observador en un hilo separado
 class ServerThread(threading.Thread):
     def __init__(self):
         threading.Thread.__init__(self)
@@ -74,7 +80,7 @@ class ServerThread(threading.Thread):
 
     def run(self):
         cambiar_permisos(DIRECTORY)
-        # Iniciar observador para detectar cambios en la carpeta seleccionada
+        # Iniciar observador para detectar cambios en la carpeta de fotos
         self.observer = Observer()
         self.observer.schedule(FileChangeHandler(), DIRECTORY, recursive=True)
         self.observer.start()
