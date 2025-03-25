@@ -26,11 +26,12 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self.path = '/index.html'
         return http.server.SimpleHTTPRequestHandler.do_GET(self)
 
-# Función para generar la galería con estilo minimalista Material You
+# Función para generar la galería con estilo minimalista y adaptado a móvil
 def generar_galeria():
     extensiones_imagenes = ('.png', '.jpg', '.jpeg', '.gif', '.bmp', '.tiff', '.webp', 'jfif')
     imagenes = [f for f in os.listdir(DIRECTORY) if f.lower().endswith(extensiones_imagenes)]
     
+    # Se utiliza un f-string; por ello, duplicamos las llaves en bloques CSS/JS
     html_content = f'''
     <!DOCTYPE html>
     <html lang="es">
@@ -40,7 +41,7 @@ def generar_galeria():
       <meta name="viewport" content="width=device-width, initial-scale=1">
       <title>Galería de Fotos</title>
       <style>
-        /* Importar fuente Roboto y definir colores al estilo Material You */
+        /* Importar fuente Roboto desde Google Fonts */
         @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap');
         body {{
           margin: 0;
@@ -164,7 +165,7 @@ def generar_galeria():
           z-index: 2;
           text-transform: uppercase;
         }}
-        /* Nuevo estilo para el botón de selección múltiple */
+        /* Estilo para el botón de Activar Selección Múltiple */
         .multi-select-btn {{
           top: 16px;
           left: 16px;
