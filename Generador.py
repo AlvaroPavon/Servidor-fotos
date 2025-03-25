@@ -82,6 +82,10 @@ def generar_galeria():
                 transition: transform 0.3s ease;
                 cursor: pointer;
                 position: relative;
+                border: 3px solid transparent;
+            }
+            .gallery img.selected {
+                border: 3px solid var(--primary-color);
             }
             .gallery img:hover {
                 transform: scale(1.05);
