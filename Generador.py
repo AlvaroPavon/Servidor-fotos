@@ -48,22 +48,138 @@ def generar_galeria():
                 --bg-color-dark: #121212;
                 --text-color-dark: #ffffff;
             }
-            body { font-family: 'SamsungOne', Arial, sans-serif; margin: 0; padding: 0; background-color: var(--bg-color); color: var(--text-color); }
-            .gallery { display: flex; flex-wrap: wrap; justify-content: center; padding: 20px; }
-            .gallery img { width: 100%; max-width: 200px; height: auto; object-fit: cover; margin: 10px; cursor: pointer; border-radius: 10px; transition: transform 0.3s ease; }
-            .gallery img:hover { transform: scale(1.05); }
-            .modal { display: none; position: fixed; z-index: 1; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.8); animation: fadeIn 0.5s; }
-            .modal-content { margin: auto; display: block; width: 80%; max-width: 700px; height: auto; border-radius: 10px; animation: zoomIn 0.5s; }
-            .close { position: absolute; top: 20px; right: 35px; color: var(--text-color); font-size: 25px; font-weight: bold; cursor: pointer; }
-            .download-btn { display: block; margin: 20px auto; padding: 6px 12px; background-color: var(--primary-color); color: var(--secondary-color); text-align: center; text-decoration: none; font-size: 14px; border-radius: 5px; }
-            .multi-select-btn { position: fixed; top: 10px; left: 10px; padding: 6px 12px; background-color: var(--primary-color); color: var(--secondary-color); text-align: center; text-decoration: none; font-size: 14px; border-radius: 5px; cursor: pointer; z-index: 2; }
-            .selected { border: 5px solid var(--primary-color); }
-            .counter { position: fixed; top: 10px; right: 10px; padding: 6px 12px; background-color: var(--primary-color); color: var(--secondary-color); text-align: center; font-size: 14px; border-radius: 5px; z-index: 2; display: flex; align-items: center; }
-            .counter .select-btn { margin-left: 10px; }
-            @media (max-width: 600px) { .gallery img { max-width: 120px; } .modal-content { width: 100%; } .download-btn, .select-btn, .multi-select-btn, .counter { font-size: 12px; padding: 4px 8px; } .close { font-size: 20px; } }
-            @media (max-width: 400px) { .gallery img { max-width: 80px; } .modal-content { width: 100%; } .download-btn, .select-btn, .multi-select-btn, .counter { font-size: 12px; padding: 4px 8px; } .close { font-size: 18px; } }
-            @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-            @keyframes zoomIn { from { transform: scale(0.5); } to { transform: scale(1); } }
+            body {
+                font-family: 'SamsungOne', Arial, sans-serif;
+                margin: 0;
+                padding: 0;
+                background-color: var(--bg-color);
+                color: var(--text-color);
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                min-height: 100vh;
+            }
+            h1 {
+                font-size: 24px;
+                text-align: center;
+                margin-bottom: 20px;
+            }
+            .gallery {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+                padding: 20px;
+                gap: 15px;
+                margin-bottom: 20px;
+            }
+            .gallery img {
+                width: 100%;
+                max-width: 180px;
+                height: auto;
+                object-fit: cover;
+                border-radius: 10px;
+                transition: transform 0.3s ease;
+                cursor: pointer;
+            }
+            .gallery img:hover {
+                transform: scale(1.05);
+            }
+            .modal {
+                display: none;
+                position: fixed;
+                z-index: 1;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0,0,0,0.8);
+                padding: 10px;
+            }
+            .modal-content {
+                margin: auto;
+                display: block;
+                width: 100%;
+                max-width: 90%;
+                height: auto;
+                border-radius: 10px;
+                animation: zoomIn 0.5s;
+            }
+            .close {
+                position: absolute;
+                top: 20px;
+                right: 35px;
+                color: var(--text-color);
+                font-size: 30px;
+                font-weight: bold;
+                cursor: pointer;
+            }
+            .download-btn {
+                display: block;
+                margin: 20px auto;
+                padding: 8px 16px;
+                background-color: var(--primary-color);
+                color: var(--secondary-color);
+                text-align: center;
+                text-decoration: none;
+                font-size: 16px;
+                border-radius: 5px;
+                cursor: pointer;
+            }
+            .multi-select-btn, .counter {
+                position: fixed;
+                padding: 10px 20px;
+                background-color: var(--primary-color);
+                color: var(--secondary-color);
+                text-align: center;
+                text-decoration: none;
+                font-size: 16px;
+                border-radius: 5px;
+                cursor: pointer;
+                z-index: 2;
+            }
+            .counter {
+                top: 10px;
+                right: 10px;
+            }
+            .multi-select-btn {
+                top: 10px;
+                left: 10px;
+            }
+            @media (max-width: 600px) {
+                .gallery img {
+                    max-width: 150px;
+                }
+                .modal-content {
+                    width: 100%;
+                }
+                .download-btn, .multi-select-btn, .counter {
+                    font-size: 14px;
+                    padding: 6px 12px;
+                }
+                .close {
+                    font-size: 25px;
+                }
+            }
+            @media (max-width: 400px) {
+                .gallery img {
+                    max-width: 120px;
+                }
+                .modal-content {
+                    width: 100%;
+                }
+                .download-btn, .multi-select-btn, .counter {
+                    font-size: 12px;
+                    padding: 4px 8px;
+                }
+                .close {
+                    font-size: 20px;
+                }
+            }
+            @keyframes zoomIn {
+                from { transform: scale(0.5); }
+                to { transform: scale(1); }
+            }
         </style>
         <script>
             let multiSelectActive = false;
@@ -145,7 +261,7 @@ def generar_galeria():
         <meta name="theme-color" content="#ffffff">
     </head>
     <body>
-        <h1 style="text-align:center;">Galería de Fotos</h1>
+        <h1>Galería de Fotos</h1>
         <button class="multi-select-btn" onclick="toggleMultiSelect()">Activar Selección Múltiple</button>
         <div class="counter" style="display:none;">Seleccionadas: 0</div>
         <div class="gallery" id="gallery">
