@@ -26,11 +26,12 @@ def generar_galeria():
             .gallery { display: flex; flex-wrap: wrap; justify-content: center; }
             .gallery img { width: 100%; max-width: 200px; height: auto; object-fit: cover; margin: 10px; cursor: pointer; }
             .modal { display: none; position: fixed; z-index: 1; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.8); }
-            .modal-content { margin: auto; display: block; width: 80%; max-width: 700px; }
+            .modal-content { margin: auto; display: block; width: 80%; max-width: 700px; height: auto; }
             .close { position: absolute; top: 20px; right: 35px; color: #fff; font-size: 40px; font-weight: bold; cursor: pointer; }
             .download-btn { display: block; margin: 20px auto; padding: 10px 20px; background-color: #4CAF50; color: white; text-align: center; text-decoration: none; font-size: 20px; border-radius: 5px; width: auto; }
             .modal-body { text-align: center; }
             @media (max-width: 600px) {
+                .gallery img { max-width: 100px; }
                 .modal-content { width: 100%; }
                 .download-btn { font-size: 16px; padding: 8px 16px; }
                 .close { font-size: 30px; }
@@ -56,6 +57,7 @@ def generar_galeria():
             function openModal(src) {
                 document.getElementById('myModal').style.display = "block";
                 document.getElementById('modalImage').src = src;
+                document.getElementById('modalImage').style.maxHeight = "80vh";
                 document.getElementById('downloadLink').href = src;
             }
             function closeModal() {
