@@ -5,7 +5,7 @@ import os
 
 # Configuración del servidor
 PORT = 8000
-DIRECTORY = "C:\\Users\\ÁlvaroPavón\\OneDrive - PLANTASUR TRADING SL\\Escritorio\\PruebaConexion"
+DIRECTORY = r"C:\Users\ÁlvaroPavón\OneDrive - PLANTASUR TRADING SL\Escritorio\PruebaConexion"
 
 class Handler(http.server.SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
