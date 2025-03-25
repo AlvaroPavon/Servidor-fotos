@@ -27,12 +27,12 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self.path = '/index.html'
         return http.server.SimpleHTTPRequestHandler.do_GET(self)
 
-# Función para generar la galería (incluye modal, selección múltiple, descarga, etc.)
+# Función para generar la galería con diseño orgánico y fluido
 def generar_galeria():
     extensiones_imagenes = ('.png', '.jpg', '.jpeg', '.gif', '.bmp', '.tiff', '.webp', 'jfif')
     imagenes = [f for f in os.listdir(DIRECTORY) if f.lower().endswith(extensiones_imagenes)]
     
-    # Se usan los recursos de OneForAll-WebUI ubicados en la carpeta "ui"
+    # Se elimina la referencia a la librería de GitHub e incorpora CSS personalizado
     html_content = f'''
     <!DOCTYPE html>
     <html lang="es">
@@ -41,36 +41,25 @@ def generar_galeria():
         <!-- Meta tag para dispositivos móviles -->
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>Galería de Fotos</title>
-        <!-- Enlace al CSS de OneForAll-WebUI desde la carpeta 'ui' -->
-        <link rel="stylesheet" href="ui/css/oneforall.min.css">
         <style>
-            :root {{
-                --primary-color: #0078D4;  /* Azul One UI */
-                --secondary-color: #ffffff;
-                --bg-color-light: #f8f9fa;
-                --bg-color-dark: #121212;
-                --text-color-light: #000000;
-                --text-color-dark: #ffffff;
-                --border-radius: 8px;
-                --card-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            }}
+            /* Fondo degradado y suave */
             body {{
-                font-family: 'SamsungOne', Arial, sans-serif;
                 margin: 0;
                 padding: 0;
-                background-color: var(--bg-color-light);
-                color: var(--text-color-light);
+                font-family: 'Arial', sans-serif;
+                background: linear-gradient(135deg, #a1c4fd, #c2e9fb);
+                color: #333;
                 display: flex;
                 flex-direction: column;
                 align-items: center;
                 box-sizing: border-box;
             }}
             h1 {{
-                font-size: 24px;
-                text-align: center;
                 margin: 20px 0;
-                color: var(--primary-color);
+                font-size: 2em;
+                text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
             }}
+            /* Contenedor de la galería con formas orgánicas */
             .gallery {{
                 display: flex;
                 flex-wrap: wrap;
@@ -78,26 +67,28 @@ def generar_galeria():
                 gap: 15px;
                 max-width: 1000px;
                 margin: 20px auto;
+                padding: 10px;
             }}
             .image-container {{
                 position: relative;
                 flex: 1 1 150px;
-                box-shadow: var(--card-shadow);
-                border-radius: var(--border-radius);
+                /* Bordes irregulares para un efecto orgánico */
+                border-radius: 40% 60% 50% 70% / 60% 40% 70% 50%;
                 overflow: hidden;
                 cursor: pointer;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+                transition: transform 0.3s ease;
+            }}
+            .image-container:hover {{
+                transform: scale(1.05);
             }}
             .image-container img {{
                 width: 100%;
                 height: auto;
                 display: block;
-                transition: transform 0.3s ease;
-            }}
-            .image-container:hover img {{
-                transform: scale(1.05);
             }}
             .gallery img.selected {{
-                border: 3px solid var(--primary-color);
+                outline: 5px solid #0078D4;
             }}
             .checkmark {{
                 position: absolute;
@@ -117,10 +108,11 @@ def generar_galeria():
             .gallery img.selected + .checkmark {{
                 display: flex;
             }}
+            /* Modal para ver imagen a pantalla completa */
             .modal {{
                 display: none;
                 position: fixed;
-                z-index: 1;
+                z-index: 10;
                 left: 0;
                 top: 0;
                 width: 100%;
@@ -137,90 +129,116 @@ def generar_galeria():
                 border-radius: 10px;
                 animation: zoomIn 0.5s;
             }}
+            /* Botón de cerrar con mix-blend-mode para adaptarse al fondo */
             .close {{
                 position: absolute;
                 top: 20px;
                 right: 35px;
-                color: var(--text-color-light);
                 font-size: 30px;
                 font-weight: bold;
                 cursor: pointer;
+                color: white;
+                mix-blend-mode: difference;
             }}
-            .download-btn {{
-                display: block;
-                margin: 20px auto;
-                padding: 8px 16px;
-                background-color: var(--primary-color);
-                color: var(--secondary-color);
-                text-align: center;
-                text-decoration: none;
-                font-size: 16px;
-                border-radius: var(--border-radius);
-                cursor: pointer;
-            }}
-            /* Botones y contador en posición fija */
+            /* Contador y botones de control minimalistas */
             .multi-select-btn, .counter {{
                 position: fixed;
-                padding: 10px 20px;
-                background-color: var(--primary-color);
-                color: var(--secondary-color);
-                text-align: center;
-                text-decoration: none;
                 font-size: 16px;
-                border-radius: var(--border-radius);
                 cursor: pointer;
                 z-index: 2;
+            }}
+            /* Estilo del botón de selección múltiple con forma */
+            .multi-select-btn {{
+                top: 10px;
+                left: 10px;
+                background: rgba(255, 255, 255, 0.8);
+                border: none;
+                border-radius: 25px;
+                color: #0078D4;
+                padding: 8px 16px;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+                font-weight: bold;
+                transition: background-color 0.3s ease;
+            }}
+            .multi-select-btn:hover {{
+                background-color: rgba(255, 255, 255, 1);
             }}
             .counter {{
                 top: 10px;
                 right: 10px;
+                background: none;
+                border: none;
+                display: flex;
+                align-items: center;
+                color: #0078D4;
             }}
-            .multi-select-btn {{
-                top: 10px;
-                left: 10px;
+            .counter .counter-number {{
+                font-size: 16px;
+                margin-right: 5px;
             }}
-            /* Reducir tamaño de botones en móviles */
+            .counter .select-btn {{
+                background: none;
+                border: none;
+                cursor: pointer;
+                font-size: 16px;
+                color: #0078D4;
+            }}
+            /* Modal: Centrar la imagen y el botón de descarga */
+            .modal-body {{
+                text-align: center;
+            }}
+            .modal-body .download-btn {{
+                margin-top: 20px;
+                display: inline-block;
+                background-color: #0078D4;
+                color: #fff;
+                padding: 10px 20px;
+                border-radius: 25px;
+                text-decoration: none;
+                font-size: 18px;
+                transition: background-color 0.3s ease;
+            }}
+            .modal-body .download-btn:hover {{
+                background-color: #005ea6;
+            }}
+            /* Animación para modal */
+            @keyframes zoomIn {{
+                from {{ transform: scale(0.5); }}
+                to {{ transform: scale(1); }}
+            }}
+            /* Ajustes responsivos */
             @media (max-width: 600px) {{
-                .multi-select-btn, .counter, .download-btn {{
-                    font-size: 12px;
-                    padding: 4px 8px;
+                h1 {{ font-size: 1.5em; }}
+                .multi-select-btn, .counter {{
+                    font-size: 14px;
+                }}
+                .modal-body .download-btn {{
+                    font-size: 16px;
+                    padding: 8px 16px;
                 }}
             }}
             @media (max-width: 400px) {{
-                .multi-select-btn, .counter, .download-btn {{
-                    font-size: 10px;
-                    padding: 2px 4px;
+                h1 {{ font-size: 1.2em; }}
+                .multi-select-btn, .counter {{
+                    font-size: 12px;
+                }}
+                .modal-body .download-btn {{
+                    font-size: 14px;
+                    padding: 6px 12px;
                 }}
             }}
-            /* Eliminar fondo, bordes y padding en el contador y el botón de descarga */
-            .counter {{
-                background: none !important;
-                padding: 0 !important;
-                border: none !important;
-            }}
-            .counter .select-btn {{
-                background: none !important;
-                padding: 0 !important;
-                border: none !important;
-                cursor: pointer;
+            @keyframes zoomIn {{
+                from {{ transform: scale(0.5); }}
+                to {{ transform: scale(1); }}
             }}
         </style>
         <script>
             let multiSelectActive = false;
             
             function setTheme() {{
-                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                if (prefersDark) {{
-                    document.documentElement.style.setProperty('--bg-color-light', '#121212');
-                    document.documentElement.style.setProperty('--text-color-light', '#ffffff');
-                }} else {{
-                    document.documentElement.style.setProperty('--bg-color-light', '#ffffff');
-                    document.documentElement.style.setProperty('--text-color-light', '#000000');
-                }}
-                document.querySelector('meta[name="theme-color"]').setAttribute('content', prefersDark ? '#121212' : '#ffffff');
+                // (Opcional: lógica para cambiar tema)
             }}
             window.addEventListener('load', setTheme);
-            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', setTheme);
 
             function openModal(src) {{
                 if (!multiSelectActive) {{
@@ -253,7 +271,7 @@ def generar_galeria():
             function toggleMultiSelect() {{
                 multiSelectActive = !multiSelectActive;
                 document.querySelector('.multi-select-btn').textContent = multiSelectActive ?
-                    'Desactivar Seleccion Multiple' : 'Activar Seleccion Multiple';
+                    'Desactivar Selección Múltiple' : 'Activar Selección Múltiple';
                 document.querySelectorAll('.gallery img').forEach(img => {{
                     img.onclick = multiSelectActive ? () => toggleSelect(img) : () => openModal(img.src);
                 }});
@@ -272,7 +290,7 @@ def generar_galeria():
                 if (multiSelectActive) {{
                     if (!selectBtn) {{
                         const btn = document.createElement('button');
-                        btn.className = 'select-btn download-btn';
+                        btn.className = 'select-btn';
                         // Usamos un icono de descarga (emoji)
                         btn.textContent = '⬇️';
                         btn.onclick = downloadSelected;
@@ -289,8 +307,8 @@ def generar_galeria():
     </head>
     <body>
         <h1>Galería de Fotos</h1>
-        <button class="multi-select-btn" onclick="toggleMultiSelect()">Activar Seleccion Multiple</button>
-        <!-- El contador ahora muestra solo el número -->
+        <button class="multi-select-btn" onclick="toggleMultiSelect()">Activar Selección Múltiple</button>
+        <!-- El contador muestra únicamente el número -->
         <div class="counter" style="display:none;"><span class="counter-number">0</span></div>
         <div class="gallery" id="gallery">
     '''
@@ -311,8 +329,6 @@ def generar_galeria():
                 <a id="downloadLink" class="download-btn" href="#" download>Descargar Imagen</a>
             </div>
         </div>
-        <!-- Enlace al JS de OneForAll-WebUI desde la carpeta 'ui' -->
-        <script src="ui/js/oneforall.min.js"></script>
     </body>
     </html>
     '''
