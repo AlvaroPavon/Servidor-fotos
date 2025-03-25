@@ -7,40 +7,44 @@ from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 import stat
 
-# Configuracion del servidor
+# Configuración del servidor
 PORT = 8000
 DIRECTORY = r"C:\Users\ÁlvaroPavón\OneDrive - PLANTASUR TRADING SL\Escritorio\PruebaConexion"
-IP_LOCAL = "192.168.1.94"  # Reemplaza esto con tu direccion IP local
+IP_LOCAL = "192.168.1.94"  # Reemplaza con tu dirección IP local
 
-# Funcion para cambiar los permisos del directorio
+# Función para cambiar los permisos del directorio
 def cambiar_permisos(directorio):
     try:
-        # Cambiar los permisos para que todos los usuarios tengan acceso de lectura y escritura
         os.chmod(directorio, stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO)
         print(f"Permisos de {directorio} cambiados exitosamente.")
     except Exception as e:
         print(f"Error al cambiar permisos: {e}")
 
-# Definir el manejador para las solicitudes HTTP
+# Manejador para las solicitudes HTTP
 class Handler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
         if self.path == '/':
             self.path = '/index.html'
         return http.server.SimpleHTTPRequestHandler.do_GET(self)
 
-# Funcion para generar la galeria
+# Función para generar la galería (incluye modal, selección múltiple, descarga, etc.)
 def generar_galeria():
     extensiones_imagenes = ('.png', '.jpg', '.jpeg', '.gif', '.bmp', '.tiff', '.webp', 'jfif')
     imagenes = [f for f in os.listdir(DIRECTORY) if f.lower().endswith(extensiones_imagenes)]
     
-    # Iniciar el contenido HTML
-    html_content = '''
-    <html>
+    # Se usan los recursos de OneForAll-WebUI ubicados en la carpeta "ui"
+    html_content = f'''
+    <!DOCTYPE html>
+    <html lang="es">
     <head>
-        <title>Galeria de Fotos</title>
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/samsunginternet/OneUI-Web/oui-css/oui.css">
+        <meta charset="utf-8">
+        <!-- Meta tag para dispositivos móviles -->
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Galería de Fotos</title>
+        <!-- Enlace al CSS de OneForAll-WebUI desde la carpeta 'ui' -->
+        <link rel="stylesheet" href="ui/css/oneforall.min.css">
         <style>
-            :root {
+            :root {{
                 --primary-color: #0078D4;  /* Azul One UI */
                 --secondary-color: #ffffff;
                 --bg-color-light: #f8f9fa;
@@ -49,8 +53,8 @@ def generar_galeria():
                 --text-color-dark: #ffffff;
                 --border-radius: 8px;
                 --card-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            }
-            body {
+            }}
+            body {{
                 font-family: 'SamsungOne', Arial, sans-serif;
                 margin: 0;
                 padding: 0;
@@ -58,44 +62,44 @@ def generar_galeria():
                 color: var(--text-color-light);
                 display: flex;
                 flex-direction: column;
-                justify-content: center;
                 align-items: center;
-                min-height: 100vh;
                 box-sizing: border-box;
-            }
-            h1 {
+            }}
+            h1 {{
                 font-size: 24px;
                 text-align: center;
-                margin-bottom: 20px;
+                margin: 20px 0;
                 color: var(--primary-color);
-            }
-            .gallery {
+            }}
+            .gallery {{
                 display: flex;
                 flex-wrap: wrap;
                 justify-content: center;
-                padding: 20px;
                 gap: 15px;
-                margin-bottom: 20px;
-            }
-            .gallery img {
-                width: 100%;
-                max-width: 180px;
-                height: auto;
-                object-fit: cover;
-                border-radius: var(--border-radius);
-                transition: transform 0.3s ease;
-                cursor: pointer;
+                max-width: 1000px;
+                margin: 20px auto;
+            }}
+            .image-container {{
                 position: relative;
+                flex: 1 1 150px;
                 box-shadow: var(--card-shadow);
-                border: 3px solid transparent;
-            }
-            .gallery img.selected {
-                border: 3px solid var(--primary-color);
-            }
-            .gallery img:hover {
+                border-radius: var(--border-radius);
+                overflow: hidden;
+                cursor: pointer;
+            }}
+            .image-container img {{
+                width: 100%;
+                height: auto;
+                display: block;
+                transition: transform 0.3s ease;
+            }}
+            .image-container:hover img {{
                 transform: scale(1.05);
-            }
-            .checkmark {
+            }}
+            .gallery img.selected {{
+                border: 3px solid var(--primary-color);
+            }}
+            .checkmark {{
                 position: absolute;
                 top: 5px;
                 right: 5px;
@@ -109,11 +113,11 @@ def generar_galeria():
                 align-items: center;
                 font-size: 18px;
                 display: none;
-            }
-            .gallery img.selected .checkmark {
+            }}
+            .gallery img.selected + .checkmark {{
                 display: flex;
-            }
-            .modal {
+            }}
+            .modal {{
                 display: none;
                 position: fixed;
                 z-index: 1;
@@ -123,8 +127,8 @@ def generar_galeria():
                 height: 100%;
                 background-color: rgba(0,0,0,0.8);
                 padding: 10px;
-            }
-            .modal-content {
+            }}
+            .modal-content {{
                 margin: auto;
                 display: block;
                 width: 100%;
@@ -132,8 +136,8 @@ def generar_galeria():
                 height: auto;
                 border-radius: 10px;
                 animation: zoomIn 0.5s;
-            }
-            .close {
+            }}
+            .close {{
                 position: absolute;
                 top: 20px;
                 right: 35px;
@@ -141,8 +145,8 @@ def generar_galeria():
                 font-size: 30px;
                 font-weight: bold;
                 cursor: pointer;
-            }
-            .download-btn {
+            }}
+            .download-btn {{
                 display: block;
                 margin: 20px auto;
                 padding: 8px 16px;
@@ -153,8 +157,9 @@ def generar_galeria():
                 font-size: 16px;
                 border-radius: var(--border-radius);
                 cursor: pointer;
-            }
-            .multi-select-btn, .counter {
+            }}
+            /* Botones y contador en posición fija */
+            .multi-select-btn, .counter {{
                 position: fixed;
                 padding: 10px 20px;
                 background-color: var(--primary-color);
@@ -165,145 +170,138 @@ def generar_galeria():
                 border-radius: var(--border-radius);
                 cursor: pointer;
                 z-index: 2;
-            }
-            .counter {
+            }}
+            .counter {{
                 top: 10px;
                 right: 10px;
-            }
-            .multi-select-btn {
+            }}
+            .multi-select-btn {{
                 top: 10px;
                 left: 10px;
-            }
-            @media (max-width: 600px) {
-                .gallery img {
-                    max-width: 150px;
-                }
-                .modal-content {
-                    width: 100%;
-                }
-                .download-btn, .multi-select-btn, .counter {
-                    font-size: 14px;
-                    padding: 6px 12px;
-                }
-                .close {
-                    font-size: 25px;
-                }
-            }
-            @media (max-width: 400px) {
-                .gallery img {
-                    max-width: 120px;
-                }
-                .modal-content {
-                    width: 100%;
-                }
-                .download-btn, .multi-select-btn, .counter {
+            }}
+            /* Reducir tamaño de botones en móviles */
+            @media (max-width: 600px) {{
+                .multi-select-btn, .counter, .download-btn {{
                     font-size: 12px;
                     padding: 4px 8px;
-                }
-                .close {
-                    font-size: 20px;
-                }
-            }
-            @keyframes zoomIn {
-                from { transform: scale(0.5); }
-                to { transform: scale(1); }
-            }
+                }}
+            }}
+            @media (max-width: 400px) {{
+                .multi-select-btn, .counter, .download-btn {{
+                    font-size: 10px;
+                    padding: 2px 4px;
+                }}
+            }}
+            /* Eliminar fondo, bordes y padding en el contador y el botón de descarga */
+            .counter {{
+                background: none !important;
+                padding: 0 !important;
+                border: none !important;
+            }}
+            .counter .select-btn {{
+                background: none !important;
+                padding: 0 !important;
+                border: none !important;
+                cursor: pointer;
+            }}
         </style>
         <script>
             let multiSelectActive = false;
-
-            function setTheme() {
+            
+            function setTheme() {{
                 const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                if (prefersDark) {
+                if (prefersDark) {{
                     document.documentElement.style.setProperty('--bg-color-light', '#121212');
                     document.documentElement.style.setProperty('--text-color-light', '#ffffff');
-                } else {
+                }} else {{
                     document.documentElement.style.setProperty('--bg-color-light', '#ffffff');
                     document.documentElement.style.setProperty('--text-color-light', '#000000');
-                }
+                }}
                 document.querySelector('meta[name="theme-color"]').setAttribute('content', prefersDark ? '#121212' : '#ffffff');
-            }
+            }}
             window.addEventListener('load', setTheme);
             window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', setTheme);
 
-            function openModal(src) {
-                if (!multiSelectActive) {
+            function openModal(src) {{
+                if (!multiSelectActive) {{
                     document.getElementById('myModal').style.display = "block";
                     document.getElementById('modalImage').src = src;
                     document.getElementById('modalImage').style.maxHeight = "80vh";
                     document.getElementById('downloadLink').href = src;
-                }
-            }
+                }}
+            }}
 
-            function closeModal() {
+            function closeModal() {{
                 document.getElementById('myModal').style.display = "none";
-            }
+            }}
 
-            function toggleSelect(img) {
+            function toggleSelect(img) {{
                 img.classList.toggle('selected');
                 updateCounter();
-            }
+            }}
 
-            function downloadSelected() {
+            function downloadSelected() {{
                 const selectedImages = document.querySelectorAll('.gallery img.selected');
-                selectedImages.forEach(img => {
+                selectedImages.forEach(img => {{
                     const link = document.createElement('a');
                     link.href = img.src;
                     link.download = img.alt;
                     link.click();
-                });
-            }
+                }});
+            }}
 
-            function toggleMultiSelect() {
+            function toggleMultiSelect() {{
                 multiSelectActive = !multiSelectActive;
-                document.querySelector('.multi-select-btn').textContent = multiSelectActive ? 'Desactivar Seleccion Multiple' : 'Activar Seleccion Multiple';
-                document.querySelectorAll('.gallery img').forEach(img => {
+                document.querySelector('.multi-select-btn').textContent = multiSelectActive ?
+                    'Desactivar Seleccion Multiple' : 'Activar Seleccion Multiple';
+                document.querySelectorAll('.gallery img').forEach(img => {{
                     img.onclick = multiSelectActive ? () => toggleSelect(img) : () => openModal(img.src);
-                });
+                }});
                 document.querySelector('.counter').style.display = multiSelectActive ? 'flex' : 'none';
-                if (!multiSelectActive) {
+                if (!multiSelectActive) {{
                     document.querySelectorAll('.gallery img.selected').forEach(img => img.classList.remove('selected'));
-                }
+                }}
                 updateCounter();
-            }
+            }}
 
-            function updateCounter() {
+            function updateCounter() {{
                 const count = document.querySelectorAll('.gallery img.selected').length;
-                document.querySelector('.counter').textContent = `Seleccionadas: ${count}`;
+                // Actualizamos solo el número en el span interno del contador
+                document.querySelector('.counter .counter-number').textContent = count;
                 const selectBtn = document.querySelector('.counter .select-btn');
-                if (multiSelectActive) {
-                    if (!selectBtn) {
+                if (multiSelectActive) {{
+                    if (!selectBtn) {{
                         const btn = document.createElement('button');
-                        btn.className = 'select-btn download-btn';  // Usando el mismo estilo de botón
-                        btn.textContent = 'Descargar Seleccionadas';
+                        btn.className = 'select-btn download-btn';
+                        // Usamos un icono de descarga (emoji)
+                        btn.textContent = '⬇️';
                         btn.onclick = downloadSelected;
                         document.querySelector('.counter').appendChild(btn);
-                    }
-                } else if (selectBtn) {
+                    }}
+                }} else if (selectBtn) {{
                     selectBtn.remove();
-                }
-            }
+                }}
+            }}
 
             document.addEventListener('contextmenu', event => event.preventDefault());
         </script>
         <meta name="theme-color" content="#ffffff">
     </head>
     <body>
-        <h1>Galeria de Fotos</h1>
+        <h1>Galería de Fotos</h1>
         <button class="multi-select-btn" onclick="toggleMultiSelect()">Activar Seleccion Multiple</button>
-        <div class="counter" style="display:none;">Seleccionadas: 0</div>
+        <!-- El contador ahora muestra solo el número -->
+        <div class="counter" style="display:none;"><span class="counter-number">0</span></div>
         <div class="gallery" id="gallery">
     '''
-    
-    # Generar imagenes de la carpeta
+    # Agregar cada imagen a la galería
     for imagen in imagenes:
         html_content += f'''
-        <div class="image-container">
-            <img src="{imagen}" alt="{imagen}" onclick="openModal('{imagen}')" ondblclick="toggleSelect(this)">
-            <div class="checkmark">✔</div>
-        </div>
+                <div class="image-container">
+                    <img src="{imagen}" alt="{imagen}" onclick="openModal('{imagen}')" ondblclick="toggleSelect(this)">
+                    <div class="checkmark">✔</div>
+                </div>
         '''
-    
     html_content += '''
         </div>
         <div id="myModal" class="modal">
@@ -313,33 +311,37 @@ def generar_galeria():
                 <a id="downloadLink" class="download-btn" href="#" download>Descargar Imagen</a>
             </div>
         </div>
+        <!-- Enlace al JS de OneForAll-WebUI desde la carpeta 'ui' -->
+        <script src="ui/js/oneforall.min.js"></script>
     </body>
     </html>
     '''
-    
-    # Guardar el archivo HTML con codificacion UTF-8
-    with open(os.path.join(DIRECTORY, 'index.html'), 'w', encoding='utf-8') as f:
-        f.write(html_content)
+    try:
+        with open(os.path.join(DIRECTORY, 'index.html'), 'w', encoding='utf-8') as f:
+            f.write(html_content)
+        print("Galería generada.")
+    except Exception as e:
+        print(f"Error al generar la galería: {e}")
 
-# Funcion para generar el codigo QR
+# Función para generar el código QR
 def generar_qr():
     url = f"http://{IP_LOCAL}:{PORT}"
     qr = qrcode.make(url)
-    qr.save("codigo_qr.png")
-    print(f"Codigo QR generado: {url}")
+    try:
+        qr.save(os.path.join(DIRECTORY, "codigo_qr.png"))
+        print(f"Código QR generado: {url}")
+    except Exception as e:
+        print(f"Error al guardar el código QR: {e}")
 
-# Funcion para observar cambios en la carpeta y generar la galeria automaticamente
+# Observador de cambios en el directorio
 class FileChangeHandler(FileSystemEventHandler):
     def on_modified(self, event):
         if event.src_path.startswith(DIRECTORY):
             generar_galeria()
 
-# Funcion para iniciar el servidor
+# Función para iniciar el servidor HTTP y el observador
 def iniciar_servidor():
-    # Cambiar los permisos del directorio antes de continuar
     cambiar_permisos(DIRECTORY)
-    
-    # Configurar observador de cambios
     event_handler = FileChangeHandler()
     observer = Observer()
     observer.schedule(event_handler, DIRECTORY, recursive=False)
