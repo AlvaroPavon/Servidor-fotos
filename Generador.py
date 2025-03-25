@@ -30,7 +30,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
 
 # Función para generar la galería
 def generar_galeria():
-    extensiones_imagenes = ('.png', '.jpg', '.jpeg', '.gif', '.bmp', '.tiff', '.webp','jfif')
+    extensiones_imagenes = ('.png', '.jpg', '.jpeg', '.gif', '.bmp', '.tiff', '.webp', 'jfif')
     imagenes = [f for f in os.listdir(DIRECTORY) if f.lower().endswith(extensiones_imagenes)]
     
     # Iniciar el contenido HTML
@@ -81,9 +81,28 @@ def generar_galeria():
                 border-radius: 10px;
                 transition: transform 0.3s ease;
                 cursor: pointer;
+                position: relative;
             }
             .gallery img:hover {
                 transform: scale(1.05);
+            }
+            .checkmark {
+                position: absolute;
+                top: 5px;
+                right: 5px;
+                width: 25px;
+                height: 25px;
+                background-color: rgba(0, 0, 0, 0.5);
+                color: white;
+                border-radius: 50%;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                font-size: 18px;
+                display: none;
+            }
+            .gallery img.selected .checkmark {
+                display: flex;
             }
             .modal {
                 display: none;
@@ -269,7 +288,12 @@ def generar_galeria():
     
     # Generar imágenes de la carpeta
     for imagen in imagenes:
-        html_content += f'<img src="{imagen}" alt="{imagen}" onclick="openModal(\'{imagen}\')" ondblclick="toggleSelect(this)">'
+        html_content += f'''
+        <div class="image-container">
+            <img src="{imagen}" alt="{imagen}" onclick="openModal('{imagen}')" ondblclick="toggleSelect(this)">
+            <div class="checkmark">✔</div>
+        </div>
+        '''
     
     html_content += '''
         </div>
@@ -284,8 +308,8 @@ def generar_galeria():
     </html>
     '''
     
-    # Guardar el archivo HTML
-    with open(os.path.join(DIRECTORY, 'index.html'), 'w') as f:
+    # Guardar el archivo HTML con codificación UTF-8
+    with open(os.path.join(DIRECTORY, 'index.html'), 'w', encoding='utf-8') as f:
         f.write(html_content)
 
 # Función para generar el código QR
