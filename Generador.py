@@ -17,13 +17,54 @@ class Handler(http.server.SimpleHTTPRequestHandler):
 def generar_galeria():
     extensiones_imagenes = ('.png', '.jpg', '.jpeg', '.gif', '.bmp', '.tiff', '.webp','jfif')
     imagenes = [f for f in os.listdir(DIRECTORY) if f.lower().endswith(extensiones_imagenes)]
-    html_content = '<html><head><title>Galería de Fotos</title></head>'
-    html_content += '<style>img { width: 200px; height: 200px; object-fit: cover; margin: 10px; }</style>'
-    html_content += '</head><body>'
-    html_content += '<h1>Galería de Fotos</h1>'
+    html_content = '''
+    <html>
+    <head>
+        <title>Galería de Fotos</title>
+        <style>
+            body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+            .gallery { display: flex; flex-wrap: wrap; justify-content: center; }
+            .gallery img { width: 100%; max-width: 200px; height: auto; object-fit: cover; margin: 10px; cursor: pointer; }
+            .modal { display: none; position: fixed; z-index: 1; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.8); }
+            .modal-content { margin: auto; display: block; width: 80%; max-width: 700px; }
+            .close { position: absolute; top: 20px; right: 35px; color: #fff; font-size: 40px; font-weight: bold; cursor: pointer; }
+            .download-btn { display: block; margin: 20px auto; padding: 10px 20px; background-color: #4CAF50; color: white; text-align: center; text-decoration: none; font-size: 20px; border-radius: 5px; width: auto; }
+            .modal-body { text-align: center; }
+            @media (max-width: 600px) {
+                .modal-content { width: 100%; }
+                .download-btn { font-size: 16px; padding: 8px 16px; }
+                .close { font-size: 30px; }
+            }
+        </style>
+    </head>
+    <body>
+        <h1 style="text-align:center;">Galería de Fotos</h1>
+        <div class="gallery">
+    '''
     for imagen in imagenes:
-        html_content += f'<div><a href="{imagen}" download><img src="{imagen}" alt="{imagen}"></a></div>'
-    html_content += '</body></html>'
+        html_content += f'<img src="{imagen}" alt="{imagen}" onclick="openModal(\'{imagen}\')">'
+    html_content += '''
+        </div>
+        <div id="myModal" class="modal">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <div class="modal-body">
+                <img class="modal-content" id="modalImage">
+                <a id="downloadLink" class="download-btn" href="#" download>Descargar Imagen</a>
+            </div>
+        </div>
+        <script>
+            function openModal(src) {
+                document.getElementById('myModal').style.display = "block";
+                document.getElementById('modalImage').src = src;
+                document.getElementById('downloadLink').href = src;
+            }
+            function closeModal() {
+                document.getElementById('myModal').style.display = "none";
+            }
+        </script>
+    </body>
+    </html>
+    '''
     
     with open(os.path.join(DIRECTORY, 'index.html'), 'w') as f:
         f.write(html_content)
