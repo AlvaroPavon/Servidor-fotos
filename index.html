@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <!-- Meta tag para dispositivos móviles -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Galería de Fotos</title>
+  <link rel="stylesheet" href="styles.css">
+  <meta name="theme-color" content="#ffffff">
+</head>
+<body>
+  <h1>Galería de Fotos</h1>
+  <button class="multi-select-btn" onclick="toggleMultiSelect()">Activar Selección Múltiple</button>
+  <!-- El contador muestra únicamente el número -->
+  <div class="counter" style="display:none;"><span class="counter-number">0</span></div>
+  <div class="gallery" id="gallery">
+    <!-- Aquí se pueden incluir etiquetas <div> con imágenes de forma dinámica o estática -->
+    <!-- Ejemplo de imagen estática (asegúrate de que el archivo exista en el directorio):
+         <div class="image-container">
+           <img src="imagen1.jpg" alt="imagen1" onclick="openModal('imagen1.jpg')" ondblclick="toggleSelect(this)">
+           <div class="checkmark">✔</div>
+         </div>
+    -->
+  </div>
+  <!-- Modal para ver imagen a pantalla completa -->
+  <div id="myModal" class="modal">
+    <span class="close" onclick="closeModal()">&times;</span>
+    <div class="modal-body">
+      <img class="modal-content" id="modalImage">
+      <a id="downloadLink" class="download-btn" href="#" download>Descargar Imagen</a>
+    </div>
+  </div>
+  <script src="scripts.js"></script>
+</body>
+</html>

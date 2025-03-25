@@ -1,0 +1,193 @@
+/* Importar fuente Roboto y definir colores al estilo Material You */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap');
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Roboto', sans-serif;
+  background: #FFF;
+  color: #202124;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+h1 {
+  margin: 16px 0;
+  font-size: 24px;
+  font-weight: 400;
+  color: #202124;
+}
+
+/* Contenedor de la galería */
+.gallery {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 16px;
+  max-width: 1000px;
+  margin: 16px auto;
+  padding: 16px;
+}
+
+/* Tarjetas de imagen minimalistas */
+.image-container {
+  position: relative;
+  flex: 1 1 150px;
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  box-shadow: 0px 1px 3px rgba(0,0,0,0.12), 0px 1px 2px rgba(0,0,0,0.24);
+  transition: transform 0.2s ease-in-out;
+}
+
+.image-container:hover {
+  transform: scale(1.03);
+}
+
+.image-container img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.gallery img.selected {
+  outline: 3px solid #1a73e8;
+}
+
+.checkmark {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 24px;
+  height: 24px;
+  background-color: rgba(26,115,232,0.8);
+  color: #FFF;
+  border-radius: 50%;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  font-size: 14px;
+}
+
+.gallery img.selected + .checkmark {
+  display: flex;
+}
+
+/* Modal para ver imagen a pantalla completa */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 10;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.8);
+  padding: 16px;
+}
+
+.modal-content {
+  margin: auto;
+  display: block;
+  width: 100%;
+  max-width: 90%;
+  height: auto;
+  border-radius: 8px;
+}
+
+/* Botón de cerrar con efecto mix-blend-mode */
+.close {
+  position: absolute;
+  top: 16px;
+  right: 24px;
+  font-size: 32px;
+  font-weight: bold;
+  cursor: pointer;
+  color: #FFF;
+  mix-blend-mode: difference;
+}
+
+/* Botón de descarga centrado debajo de la imagen en el modal */
+.modal-body {
+  text-align: center;
+}
+
+.modal-body .download-btn {
+  margin-top: 16px;
+  display: inline-block;
+  background-color: #1a73e8;
+  color: #FFF;
+  padding: 10px 20px;
+  border-radius: 4px;
+  text-decoration: none;
+  font-size: 16px;
+  transition: background-color 0.2s ease;
+}
+
+.modal-body .download-btn:hover {
+  background-color: #1669c1;
+}
+
+/* Botón de selección múltiple y contador minimalistas */
+.multi-select-btn, .counter {
+  position: fixed;
+  font-size: 16px;
+  cursor: pointer;
+  z-index: 2;
+  text-transform: uppercase;
+}
+
+/* Estilo para el botón de selección múltiple */
+.multi-select-btn {
+  top: 16px;
+  left: 16px;
+  background-color: #1a73e8;
+  color: #FFF;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  transition: background-color 0.2s ease;
+}
+
+.multi-select-btn:hover {
+  background-color: #1669c1;
+}
+
+.counter {
+  top: 16px;
+  right: 16px;
+  display: flex;
+  align-items: center;
+  background: none;
+  border: none;
+  color: #1a73e8;
+}
+
+.counter .counter-number {
+  font-size: 16px;
+  margin-right: 4px;
+}
+
+.counter .select-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  color: #1a73e8;
+}
+
+/* Ajustes responsivos */
+@media (max-width: 600px) {
+  h1 { font-size: 20px; }
+  .multi-select-btn, .counter { font-size: 14px; }
+  .modal-body .download-btn { font-size: 14px; padding: 8px 16px; }
+}
+
+@media (max-width: 400px) {
+  h1 { font-size: 18px; }
+  .multi-select-btn, .counter { font-size: 12px; }
+  .modal-body .download-btn { font-size: 12px; padding: 6px 12px; }
+}
